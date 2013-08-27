@@ -1,0 +1,30 @@
+main-class: "me.ampayne2.spleef.Spleef"
+description: "The official Ultimate Games Spleef game"
+version: "1.0"
+author: "ampayne2"
+scoreTypeName: "Kills:Deaths"
+scoreType: "POINTS_HIGHER"
+playerType: "CONFIGUREABLE"
+DefaultSettings:
+  MinPlayers: 2
+  MaxPlayers: 16
+  Players:
+    Store-Inventory: false
+    Store-Armor: false
+    Store-Exp: false
+    Store-Effects: false
+    Store-Gamemode: false
+  Reset-After-Match: true
+  Allow-Explosion-Damage: true
+  Allow-Explosion-Block-Breaking: false
+  Use-Whitelist-As-Blacklist: false
+CustomValues:
+  StartWaitTime: 30
+  MaxGameTime: 300
+Instructions:
+- "Dig out the snow blocks underneath other players to make them fall, and avoid falling in yourself!\n\nLast player standing wins!"
+Messages:
+  GameEnd: "%s won %s on arena %s!"
+  Death: "%s died!"
+BlockBreakWhitelist:
+- "SNOW_BLOCK"
