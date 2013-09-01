@@ -13,7 +13,13 @@ import me.ampayne2.ultimategames.scoreboards.ArenaScoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -76,6 +82,9 @@ public class Spleef extends GamePlugin {
         for (String playerName : arena.getPlayers()) {
             scoreBoard.addPlayer(Bukkit.getPlayerExact(playerName));
         }
+        for (SpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
+            spawnPoint.lock(false);
+        }
         scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
         scoreBoard.setVisible(true);
 
@@ -110,22 +119,45 @@ public class Spleef extends GamePlugin {
         if (arena.getStatus() == ArenaStatus.OPEN && arena.getPlayers().size() >= arena.getMinPlayers() && !ultimateGames.getCountdownManager().isStartingCountdownEnabled(arena)) {
             ultimateGames.getCountdownManager().createStartingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getConfig().getInt("CustomValues.StartWaitTime"));
         }
-        SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
-        spawnPoint.lock(false);
-        spawnPoint.teleportPlayer(player);
+        for (SpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
+            spawnPoint.lock(false);
+        }
+        List<SpawnPoint> spawnPoints = ultimateGames.getSpawnpointManager().getDistributedSpawnPoints(arena, arena.getPlayers().size());
+        for (int i=0; i < arena.getPlayers().size(); i++) {
+            SpawnPoint spawnPoint = spawnPoints.get(i);
+            spawnPoint.lock(true);
+            spawnPoint.teleportPlayer(Bukkit.getPlayerExact(arena.getPlayers().get(i)));
+        }
         resetInventory(player);
         return true;
     }
 
     @Override
     public void removePlayer(Player player, Arena arena) {
-
+        
     }
     
     @Override
     public Boolean addSpectator(Player player, Arena arena) {
+        SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
+        while (spawnPoint.getPlayer() != null) {
+            spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
+        }
+        spawnPoint.lock(false);
+        spawnPoint.teleportPlayer(player);
         resetInventory(player);
         return true;
+    }
+    
+    @Override
+    public void makePlayerSpectator(Player player, Arena arena) {
+        SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
+        while (spawnPoint.getPlayer() != null) {
+            spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
+        }
+        spawnPoint.lock(false);
+        spawnPoint.teleportPlayer(player);
+        resetInventory(player);
     }
 
     @Override
@@ -144,9 +176,13 @@ public class Spleef extends GamePlugin {
                 }
             }
             ultimateGames.getMessageManager().broadcastReplacedGameMessageToArena(game, arena, "Death", player.getName());
+            ultimateGames.getPlayerManager().makePlayerSpectator(player);
         }
         event.getDrops().clear();
         ultimateGames.getUtils().autoRespawn(player);
+        if (arena.getPlayers().size() <= 1) {
+            ultimateGames.getArenaManager().endArena(arena);
+        }
     }
 
     @Override
@@ -157,7 +193,7 @@ public class Spleef extends GamePlugin {
 
     @Override
     public void onEntityDamage(Arena arena, EntityDamageEvent event) {
-        if (!(event.getCause() == DamageCause.LAVA || event.getCause() == DamageCause.FIRE_TICK)) {
+        if (event.getCause() != DamageCause.LAVA) {
             event.setCancelled(true);
         }
     }
@@ -180,6 +216,26 @@ public class Spleef extends GamePlugin {
     @Override
     public void onItemDrop(Arena arena, PlayerDropItemEvent event) {
         event.setCancelled(true);
+    }
+    
+    @Override
+    public void onBlockBreak(Arena arena, BlockBreakEvent event) {
+        event.setCancelled(true);
+        final Block block = event.getBlock();
+        Bukkit.getScheduler().scheduleSyncDelayedTask(ultimateGames, new Runnable() {
+            @Override
+            public void run() {
+                block.setType(Material.AIR);
+            }
+        }, 0L);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerIgnite(EntityCombustEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Player) {
+            event.setCancelled(true);
+        }
     }
 
     @SuppressWarnings("deprecation")

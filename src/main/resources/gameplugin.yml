@@ -7,7 +7,7 @@ scoreType: "POINTS_HIGHER"
 playerType: "CONFIGUREABLE"
 DefaultSettings:
   MinPlayers: 2
-  MaxPlayers: 16
+  MaxPlayers: 8
   Players:
     Store-Inventory: false
     Store-Armor: false
@@ -16,11 +16,12 @@ DefaultSettings:
     Store-Gamemode: false
   Reset-After-Match: true
   Allow-Explosion-Damage: true
-  Allow-Explosion-Block-Breaking: false
+  Allow-Explosion-Block-Breaking: true
+  Allow-Mob-Spawning: false
   Use-Whitelist-As-Blacklist: false
 CustomValues:
   StartWaitTime: 30
-  MaxGameTime: 300
+  MaxGameTime: 600
 Instructions:
 - "Dig out the snow blocks underneath other players to make them fall, and avoid falling in yourself!\n\nLast player standing wins!"
 Messages:
