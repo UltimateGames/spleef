@@ -27,11 +27,9 @@ public class SpleefWebHandler implements WebHandler {
         Gson gson = new Gson();
         Map<String, Integer> map = new HashMap<String, Integer>();
 
-        for (ArenaScoreboard scoreBoard : ug.getScoreboardManager().getArenaScoreboards(arena)) {
-            if (scoreBoard.getName().equals("Kills")) {
-                map.put("Survivors", scoreBoard.getScore(ChatColor.GREEN + "Survivors"));
-                break;
-            }
+        ArenaScoreboard scoreBoard = ug.getScoreboardManager().getArenaScoreboard(arena);
+        if (scoreBoard != null) {
+            map.put("Survivors", scoreBoard.getScore(ChatColor.GREEN + "Survivors"));
         }
         return gson.toJson(map);
     }

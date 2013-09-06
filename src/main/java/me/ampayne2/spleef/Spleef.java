@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -44,7 +45,12 @@ public class Spleef extends GamePlugin {
     }
 
     @Override
-    public Boolean unloadGame() {
+    public void unloadGame() {
+
+    }
+
+    @Override
+    public Boolean reloadGame() {
         return true;
     }
 
@@ -123,7 +129,7 @@ public class Spleef extends GamePlugin {
             spawnPoint.lock(false);
         }
         List<SpawnPoint> spawnPoints = ultimateGames.getSpawnpointManager().getDistributedSpawnPoints(arena, arena.getPlayers().size());
-        for (int i=0; i < arena.getPlayers().size(); i++) {
+        for (int i = 0; i < arena.getPlayers().size(); i++) {
             SpawnPoint spawnPoint = spawnPoints.get(i);
             spawnPoint.lock(true);
             spawnPoint.teleportPlayer(Bukkit.getPlayerExact(arena.getPlayers().get(i)));
@@ -134,9 +140,9 @@ public class Spleef extends GamePlugin {
 
     @Override
     public void removePlayer(Player player, Arena arena) {
-        
+
     }
-    
+
     @Override
     public Boolean addSpectator(Player player, Arena arena) {
         SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
@@ -148,7 +154,7 @@ public class Spleef extends GamePlugin {
         resetInventory(player);
         return true;
     }
-    
+
     @Override
     public void makePlayerSpectator(Player player, Arena arena) {
         SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
@@ -170,10 +176,9 @@ public class Spleef extends GamePlugin {
         Player player = event.getEntity();
         if (arena.getStatus() == ArenaStatus.RUNNING) {
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
-            for (ArenaScoreboard scoreBoard : ultimateGames.getScoreboardManager().getArenaScoreboards(arena)) {
-                if (scoreBoard.getName().equals(game.getName())) {
-                    scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
-                }
+            ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().getArenaScoreboard(arena);
+            if (scoreBoard != null) {
+                scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
             }
             ultimateGames.getMessageManager().broadcastReplacedGameMessageToArena(game, arena, "Death", player.getName());
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
@@ -217,7 +222,7 @@ public class Spleef extends GamePlugin {
     public void onItemDrop(Arena arena, PlayerDropItemEvent event) {
         event.setCancelled(true);
     }
-    
+
     @Override
     public void onBlockBreak(Arena arena, BlockBreakEvent event) {
         event.setCancelled(true);
@@ -230,6 +235,11 @@ public class Spleef extends GamePlugin {
         }, 0L);
     }
     
+    @Override
+    public void onBlockFade(Arena arena, BlockFadeEvent event) {
+        event.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerIgnite(EntityCombustEvent event) {
         Entity entity = event.getEntity();
