@@ -140,7 +140,9 @@ public class Spleef extends GamePlugin {
 
     @Override
     public void removePlayer(Player player, Arena arena) {
-
+        if (arena.getPlayers().size() <= 1) {
+            ultimateGames.getArenaManager().endArena(arena);
+        }
     }
 
     @Override
