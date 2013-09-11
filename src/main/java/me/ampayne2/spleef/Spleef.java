@@ -5,7 +5,7 @@ import java.util.List;
 import me.ampayne2.ultimategames.UltimateGames;
 import me.ampayne2.ultimategames.api.GamePlugin;
 import me.ampayne2.ultimategames.arenas.Arena;
-import me.ampayne2.ultimategames.arenas.SpawnPoint;
+import me.ampayne2.ultimategames.arenas.PlayerSpawnPoint;
 import me.ampayne2.ultimategames.enums.ArenaStatus;
 import me.ampayne2.ultimategames.games.Game;
 import me.ampayne2.ultimategames.scoreboards.ArenaScoreboard;
@@ -88,7 +88,7 @@ public class Spleef extends GamePlugin {
         for (String playerName : arena.getPlayers()) {
             scoreBoard.addPlayer(Bukkit.getPlayerExact(playerName));
         }
-        for (SpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
+        for (PlayerSpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
             spawnPoint.lock(false);
         }
         scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
@@ -125,14 +125,17 @@ public class Spleef extends GamePlugin {
         if (arena.getStatus() == ArenaStatus.OPEN && arena.getPlayers().size() >= arena.getMinPlayers() && !ultimateGames.getCountdownManager().isStartingCountdownEnabled(arena)) {
             ultimateGames.getCountdownManager().createStartingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getConfig().getInt("CustomValues.StartWaitTime"));
         }
-        for (SpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
+        for (PlayerSpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
             spawnPoint.lock(false);
         }
-        List<SpawnPoint> spawnPoints = ultimateGames.getSpawnpointManager().getDistributedSpawnPoints(arena, arena.getPlayers().size());
+        List<PlayerSpawnPoint> spawnPoints = ultimateGames.getSpawnpointManager().getDistributedSpawnPoints(arena, arena.getPlayers().size());
         for (int i = 0; i < arena.getPlayers().size(); i++) {
-            SpawnPoint spawnPoint = spawnPoints.get(i);
+            PlayerSpawnPoint spawnPoint = spawnPoints.get(i);
             spawnPoint.lock(true);
             spawnPoint.teleportPlayer(Bukkit.getPlayerExact(arena.getPlayers().get(i)));
+        }
+        for (PotionEffect potionEffect : player.getActivePotionEffects()) {
+            player.removePotionEffect(potionEffect.getType());
         }
         resetInventory(player);
         return true;
@@ -147,24 +150,14 @@ public class Spleef extends GamePlugin {
 
     @Override
     public Boolean addSpectator(Player player, Arena arena) {
-        SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
-        while (spawnPoint.getPlayer() != null) {
-            spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
-        }
-        spawnPoint.lock(false);
-        spawnPoint.teleportPlayer(player);
+        ultimateGames.getSpawnpointManager().getSpectatorSpawnPoint(arena).teleportPlayer(player);
         resetInventory(player);
         return true;
     }
 
     @Override
     public void makePlayerSpectator(Player player, Arena arena) {
-        SpawnPoint spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
-        while (spawnPoint.getPlayer() != null) {
-            spawnPoint = ultimateGames.getSpawnpointManager().getRandomSpawnPoint(arena);
-        }
-        spawnPoint.lock(false);
-        spawnPoint.teleportPlayer(player);
+        ultimateGames.getSpawnpointManager().getSpectatorSpawnPoint(arena).teleportPlayer(player);
         resetInventory(player);
     }
 
@@ -236,7 +229,7 @@ public class Spleef extends GamePlugin {
             }
         }, 0L);
     }
-    
+
     @Override
     public void onBlockFade(Arena arena, BlockFadeEvent event) {
         event.setCancelled(true);
