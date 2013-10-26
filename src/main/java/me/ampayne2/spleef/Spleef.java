@@ -10,6 +10,7 @@ import me.ampayne2.ultimategames.enums.ArenaStatus;
 import me.ampayne2.ultimategames.games.Game;
 import me.ampayne2.ultimategames.scoreboards.ArenaScoreboard;
 
+import me.ampayne2.ultimategames.utils.UGUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -101,7 +102,7 @@ public class Spleef extends GamePlugin {
     public void endArena(Arena arena) {
         List<String> players = arena.getPlayers();
         if (players.size() == 1) {
-            ultimateGames.getMessageManager().broadcastReplacedGameMessage(game, "GameEnd", players.get(0), game.getName(), arena.getName());
+            ultimateGames.getMessageManager().sendGameMessage(ultimateGames.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
         }
     }
 
@@ -122,7 +123,7 @@ public class Spleef extends GamePlugin {
 
     @Override
     public Boolean addPlayer(Player player, Arena arena) {
-        if (arena.getStatus() == ArenaStatus.OPEN && arena.getPlayers().size() >= arena.getMinPlayers() && !ultimateGames.getCountdownManager().isStartingCountdownEnabled(arena)) {
+        if (arena.getStatus() == ArenaStatus.OPEN && arena.getPlayers().size() >= arena.getMinPlayers() && !ultimateGames.getCountdownManager().hasStartingCountdown(arena)) {
             ultimateGames.getCountdownManager().createStartingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getConfig().getInt("CustomValues.StartWaitTime"));
         }
         for (PlayerSpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
@@ -175,11 +176,11 @@ public class Spleef extends GamePlugin {
             if (scoreBoard != null) {
                 scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
             }
-            ultimateGames.getMessageManager().broadcastReplacedGameMessageToArena(game, arena, "Death", player.getName());
+            ultimateGames.getMessageManager().sendGameMessage(arena, game, "Death", player.getName());
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
         }
         event.getDrops().clear();
-        ultimateGames.getUtils().autoRespawn(player);
+        UGUtils.autoRespawn(player);
         if (arena.getPlayers().size() <= 1) {
             ultimateGames.getArenaManager().endArena(arena);
         }
@@ -251,7 +252,7 @@ public class Spleef extends GamePlugin {
         player.setHealth(20.0);
         player.setFoodLevel(20);
         player.getInventory().clear();
-        player.getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE), ultimateGames.getUtils().createInstructionBook(game));
+        player.getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE), UGUtils.createInstructionBook(game));
         player.getInventory().setArmorContents(null);
         player.updateInventory();
     }
