@@ -28,10 +28,13 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class Spleef extends GamePlugin {
 
@@ -269,8 +272,25 @@ public class Spleef extends GamePlugin {
         } else {
             player.getInventory().addItem(new ItemStack(Material.WOOD_SPADE));
         }
+
+        if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "haste")) {
+            ItemStack sugar = new ItemStack(Material.SUGAR);
+            ItemMeta meta = sugar.getItemMeta();
+            meta.setDisplayName(ChatColor.GOLD + "5s Haste");
+            sugar.setItemMeta(meta);
+            player.getInventory().addItem(sugar);
+        }
+
         player.getInventory().addItem(UGUtils.createInstructionBook(game));
         player.getInventory().setArmorContents(null);
         player.updateInventory();
+    }
+
+    @Override
+    public void onPlayerInteract(final Arena arena, PlayerInteractEvent event) {
+        if (event.getMaterial().equals(Material.SUGAR)) {
+            event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 100, 1));
+            event.getPlayer().getInventory().remove(event.getItem());
+        }
     }
 }
