@@ -261,16 +261,14 @@ public class Spleef extends GamePlugin {
         player.setHealth(20.0);
         player.setFoodLevel(20);
         player.getInventory().clear();
-        if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "diamondshovel")) {
+        if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel3")) {
             player.getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE));
-        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "ironshovel")) {
+        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel2")) {
             player.getInventory().addItem(new ItemStack(Material.IRON_SPADE));
-        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "goldshovel")) {
+        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel1")) {
             player.getInventory().addItem(new ItemStack(Material.GOLD_SPADE));
-        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "stoneshovel")) {
-            player.getInventory().addItem(new ItemStack(Material.STONE_SPADE));
         } else {
-            player.getInventory().addItem(new ItemStack(Material.WOOD_SPADE));
+            player.getInventory().addItem(new ItemStack(Material.STONE_SPADE));
         }
 
         if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "haste")) {
