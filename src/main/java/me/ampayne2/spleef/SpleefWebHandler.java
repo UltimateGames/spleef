@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpleefWebHandler implements WebHandler {
-
     private Arena arena;
     private UltimateGames ug;
 

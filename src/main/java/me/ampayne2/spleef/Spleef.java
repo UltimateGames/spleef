@@ -7,6 +7,7 @@ import me.ampayne2.ultimategames.arenas.ArenaStatus;
 import me.ampayne2.ultimategames.arenas.scoreboards.ArenaScoreboard;
 import me.ampayne2.ultimategames.arenas.spawnpoints.PlayerSpawnPoint;
 import me.ampayne2.ultimategames.games.Game;
+import me.ampayne2.ultimategames.games.items.GameItem;
 import me.ampayne2.ultimategames.utils.UGUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,30 +22,28 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 
 public class Spleef extends GamePlugin {
     private UltimateGames ultimateGames;
     private Game game;
+    private static final GameItem HASTE = new Haste();
 
     @Override
     public boolean loadGame(UltimateGames ultimateGames, Game game) {
         this.ultimateGames = ultimateGames;
         this.game = game;
+        ultimateGames.getGameItemManager().registerGameItem(game, HASTE);
         return true;
     }
 
     @Override
     public void unloadGame() {
-
     }
 
     @Override
@@ -134,9 +133,6 @@ public class Spleef extends GamePlugin {
             spawnPoint.lock(true);
             spawnPoint.teleportPlayer(Bukkit.getPlayerExact(arena.getPlayers().get(i)));
         }
-        for (PotionEffect potionEffect : player.getActivePotionEffects()) {
-            player.removePotionEffect(potionEffect.getType());
-        }
         resetInventory(player);
         return true;
     }
@@ -159,16 +155,19 @@ public class Spleef extends GamePlugin {
     public void makePlayerSpectator(Player player, Arena arena) {
         ultimateGames.getSpawnpointManager().getSpectatorSpawnPoint(arena).teleportPlayer(player);
         resetInventory(player);
+        if (arena.getPlayers().size() <= 1) {
+            ultimateGames.getArenaManager().endArena(arena);
+        }
     }
 
     @Override
     public void removeSpectator(Player player, Arena arena) {
-
     }
 
     @Override
     public void onPlayerDeath(Arena arena, PlayerDeathEvent event) {
         Player player = event.getEntity();
+        UGUtils.autoRespawn(player);
         if (arena.getStatus() == ArenaStatus.RUNNING) {
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
             ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().getScoreboard(arena);
@@ -180,12 +179,8 @@ public class Spleef extends GamePlugin {
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
         }
         event.getDrops().clear();
-        UGUtils.autoRespawn(player);
         for (String playerName : arena.getPlayers()) {
             ultimateGames.getPointManager().addPoint(game, playerName, "store", 1);
-        }
-        if (arena.getPlayers().size() <= 1) {
-            ultimateGames.getArenaManager().endArena(arena);
         }
     }
 
@@ -197,14 +192,16 @@ public class Spleef extends GamePlugin {
 
     @Override
     public void onEntityDamage(Arena arena, EntityDamageEvent event) {
-        if (event.getCause() != DamageCause.LAVA) {
+        if (event.getCause() != DamageCause.LAVA && event.getCause() != DamageCause.ENTITY_ATTACK) {
             event.setCancelled(true);
         }
     }
 
     @Override
     public void onEntityDamageByEntity(Arena arena, EntityDamageByEntityEvent event) {
-        event.setCancelled(true);
+        if (!(event.getDamager() instanceof Player)) {
+            event.setCancelled(true);
+        }
     }
 
     @Override
@@ -222,6 +219,7 @@ public class Spleef extends GamePlugin {
         event.setCancelled(true);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onBlockBreak(Arena arena, BlockBreakEvent event) {
         event.setCancelled(true);
@@ -232,6 +230,7 @@ public class Spleef extends GamePlugin {
                 block.setType(Material.AIR);
             }
         }, 0L);
+        event.getPlayer().updateInventory();
     }
 
     @Override
@@ -266,23 +265,11 @@ public class Spleef extends GamePlugin {
         }
 
         if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "haste")) {
-            ItemStack sugar = new ItemStack(Material.SUGAR);
-            ItemMeta meta = sugar.getItemMeta();
-            meta.setDisplayName(ChatColor.GOLD + "5s Haste");
-            sugar.setItemMeta(meta);
-            player.getInventory().addItem(sugar);
+            player.getInventory().addItem(HASTE.getItem());
         }
 
         player.getInventory().addItem(UGUtils.createInstructionBook(game));
         player.getInventory().setArmorContents(null);
         player.updateInventory();
-    }
-
-    @Override
-    public void onPlayerInteract(final Arena arena, PlayerInteractEvent event) {
-        if (event.getMaterial().equals(Material.SUGAR)) {
-            event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 100, 1));
-            event.getPlayer().getInventory().remove(event.getItem());
-        }
     }
 }
