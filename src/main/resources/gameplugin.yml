@@ -2,11 +2,9 @@ main-class: "me.ampayne2.spleef.Spleef"
 description: "The official Ultimate Games Spleef game"
 version: "1.0"
 author: "ampayne2"
-scoreTypeName: "Kills:Deaths"
-scoreType: "POINTS_HIGHER"
 playerType: "CONFIGUREABLE"
 DefaultSettings:
-  MinPlayers: 2
+  MinPlayers: 3
   MaxPlayers: 8
   Players:
     Store-Inventory: false

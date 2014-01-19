@@ -1,7 +1,5 @@
 package me.ampayne2.spleef;
 
-import java.util.List;
-
 import me.ampayne2.ultimategames.UltimateGames;
 import me.ampayne2.ultimategames.api.GamePlugin;
 import me.ampayne2.ultimategames.arenas.Arena;
@@ -9,7 +7,6 @@ import me.ampayne2.ultimategames.arenas.ArenaStatus;
 import me.ampayne2.ultimategames.arenas.scoreboards.ArenaScoreboard;
 import me.ampayne2.ultimategames.arenas.spawnpoints.PlayerSpawnPoint;
 import me.ampayne2.ultimategames.games.Game;
-
 import me.ampayne2.ultimategames.utils.UGUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,12 +18,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -36,8 +29,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class Spleef extends GamePlugin {
+import java.util.List;
 
+public class Spleef extends GamePlugin {
     private UltimateGames ultimateGames;
     private Game game;
 
@@ -86,9 +80,9 @@ public class Spleef extends GamePlugin {
 
     @Override
     public boolean beginArena(Arena arena) {
-        ultimateGames.getCountdownManager().createEndingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getConfig().getInt("CustomValues.MaxGameTime"), false);
+        ultimateGames.getCountdownManager().createEndingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getInt("CustomValues.MaxGameTime"), false);
 
-        ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().createArenaScoreboard(arena, game.getName());
+        ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().createScoreboard(arena, game.getName());
         for (String playerName : arena.getPlayers()) {
             scoreBoard.addPlayer(Bukkit.getPlayerExact(playerName));
         }
@@ -105,7 +99,7 @@ public class Spleef extends GamePlugin {
     public void endArena(Arena arena) {
         List<String> players = arena.getPlayers();
         if (players.size() == 1) {
-            ultimateGames.getMessageManager().sendGameMessage(ultimateGames.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
+            ultimateGames.getMessenger().sendGameMessage(ultimateGames.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
             ultimateGames.getPointManager().addPoint(game, players.get(0), "store", 10);
             ultimateGames.getPointManager().addPoint(game, players.get(0), "win", 1);
         }
@@ -129,7 +123,7 @@ public class Spleef extends GamePlugin {
     @Override
     public boolean addPlayer(Player player, Arena arena) {
         if (arena.getStatus() == ArenaStatus.OPEN && arena.getPlayers().size() >= arena.getMinPlayers() && !ultimateGames.getCountdownManager().hasStartingCountdown(arena)) {
-            ultimateGames.getCountdownManager().createStartingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getConfig().getInt("CustomValues.StartWaitTime"));
+            ultimateGames.getCountdownManager().createStartingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getInt("CustomValues.StartWaitTime"));
         }
         for (PlayerSpawnPoint spawnPoint : ultimateGames.getSpawnpointManager().getSpawnPointsOfArena(arena)) {
             spawnPoint.lock(false);
@@ -177,11 +171,11 @@ public class Spleef extends GamePlugin {
         Player player = event.getEntity();
         if (arena.getStatus() == ArenaStatus.RUNNING) {
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
-            ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().getArenaScoreboard(arena);
+            ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().getScoreboard(arena);
             if (scoreBoard != null) {
                 scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
             }
-            ultimateGames.getMessageManager().sendGameMessage(arena, game, "Death", player.getName());
+            ultimateGames.getMessenger().sendGameMessage(arena, game, "Death", player.getName());
             ultimateGames.getPointManager().addPoint(game, player.getName(), "loss", 1);
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
         }
