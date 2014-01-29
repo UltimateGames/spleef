@@ -1,14 +1,14 @@
 package me.ampayne2.spleef;
 
-import me.ampayne2.ultimategames.UltimateGames;
-import me.ampayne2.ultimategames.api.GamePlugin;
-import me.ampayne2.ultimategames.arenas.Arena;
-import me.ampayne2.ultimategames.arenas.ArenaStatus;
-import me.ampayne2.ultimategames.arenas.scoreboards.ArenaScoreboard;
-import me.ampayne2.ultimategames.arenas.spawnpoints.PlayerSpawnPoint;
-import me.ampayne2.ultimategames.games.Game;
-import me.ampayne2.ultimategames.games.items.GameItem;
-import me.ampayne2.ultimategames.utils.UGUtils;
+import me.ampayne2.ultimategames.api.UltimateGames;
+import me.ampayne2.ultimategames.api.arenas.Arena;
+import me.ampayne2.ultimategames.api.arenas.ArenaStatus;
+import me.ampayne2.ultimategames.api.arenas.scoreboards.Scoreboard;
+import me.ampayne2.ultimategames.api.arenas.spawnpoints.PlayerSpawnPoint;
+import me.ampayne2.ultimategames.api.games.Game;
+import me.ampayne2.ultimategames.api.games.GamePlugin;
+import me.ampayne2.ultimategames.api.games.items.GameItem;
+import me.ampayne2.ultimategames.api.utils.UGUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -81,7 +81,7 @@ public class Spleef extends GamePlugin {
     public boolean beginArena(Arena arena) {
         ultimateGames.getCountdownManager().createEndingCountdown(arena, ultimateGames.getConfigManager().getGameConfig(game).getInt("CustomValues.MaxGameTime"), false);
 
-        ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().createScoreboard(arena, game.getName());
+        Scoreboard scoreBoard = ultimateGames.getScoreboardManager().createScoreboard(arena, game.getName());
         for (String playerName : arena.getPlayers()) {
             scoreBoard.addPlayer(Bukkit.getPlayerExact(playerName));
         }
@@ -98,13 +98,12 @@ public class Spleef extends GamePlugin {
     public void endArena(Arena arena) {
         List<String> players = arena.getPlayers();
         if (players.size() == 1) {
-            ultimateGames.getMessenger().sendGameMessage(ultimateGames.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
+            ultimateGames.getMessenger().sendGameMessage(Bukkit.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
             ultimateGames.getPointManager().addPoint(game, players.get(0), "store", 10);
             ultimateGames.getPointManager().addPoint(game, players.get(0), "win", 1);
         }
     }
 
-    @Override
     public boolean resetArena(Arena arena) {
         return true;
     }
@@ -167,10 +166,10 @@ public class Spleef extends GamePlugin {
     @Override
     public void onPlayerDeath(Arena arena, PlayerDeathEvent event) {
         Player player = event.getEntity();
-        UGUtils.autoRespawn(player);
+        UGUtils.autoRespawn(ultimateGames.getPlugin(), player);
         if (arena.getStatus() == ArenaStatus.RUNNING) {
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
-            ArenaScoreboard scoreBoard = ultimateGames.getScoreboardManager().getScoreboard(arena);
+            Scoreboard scoreBoard = ultimateGames.getScoreboardManager().getScoreboard(arena);
             if (scoreBoard != null) {
                 scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
             }
@@ -224,7 +223,7 @@ public class Spleef extends GamePlugin {
     public void onBlockBreak(Arena arena, BlockBreakEvent event) {
         event.setCancelled(true);
         final Block block = event.getBlock();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(ultimateGames, new Runnable() {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(ultimateGames.getPlugin(), new Runnable() {
             @Override
             public void run() {
                 block.setType(Material.AIR);

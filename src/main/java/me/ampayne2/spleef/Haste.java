@@ -1,7 +1,7 @@
 package me.ampayne2.spleef;
 
-import me.ampayne2.ultimategames.arenas.Arena;
-import me.ampayne2.ultimategames.games.items.GameItem;
+import me.ampayne2.ultimategames.api.arenas.Arena;
+import me.ampayne2.ultimategames.api.games.items.GameItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
