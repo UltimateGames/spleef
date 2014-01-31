@@ -201,6 +201,7 @@ public class Spleef extends GamePlugin {
         if (!(event.getDamager() instanceof Player)) {
             event.setCancelled(true);
         }
+        event.setDamage(0);
     }
 
     @Override
