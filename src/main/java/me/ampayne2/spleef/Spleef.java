@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,6 +34,10 @@ public class Spleef extends GamePlugin {
     private UltimateGames ultimateGames;
     private Game game;
     private static final GameItem HASTE = new Haste();
+    private static final ItemStack SHOVEL;
+    private static final ItemStack SHOVEL1;
+    private static final ItemStack SHOVEL2;
+    private static final ItemStack SHOVEL3;
 
     @Override
     public boolean loadGame(UltimateGames ultimateGames, Game game) {
@@ -255,13 +260,13 @@ public class Spleef extends GamePlugin {
         player.setFoodLevel(20);
         player.getInventory().clear();
         if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel3")) {
-            player.getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE));
+            player.getInventory().addItem(SHOVEL3);
         } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel2")) {
-            player.getInventory().addItem(new ItemStack(Material.GOLD_SPADE));
+            player.getInventory().addItem(SHOVEL2);
         } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel1")) {
-            player.getInventory().addItem(new ItemStack(Material.IRON_SPADE));
+            player.getInventory().addItem(SHOVEL1);
         } else {
-            player.getInventory().addItem(new ItemStack(Material.STONE_SPADE));
+            player.getInventory().addItem(SHOVEL);
         }
 
         if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "haste")) {
@@ -271,5 +276,20 @@ public class Spleef extends GamePlugin {
         player.getInventory().addItem(UGUtils.createInstructionBook(game));
         player.getInventory().setArmorContents(null);
         player.updateInventory();
+    }
+
+    static {
+        SHOVEL = new ItemStack(Material.STONE_SPADE);
+        SHOVEL.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+        SHOVEL.addEnchantment(Enchantment.DIG_SPEED, 2);
+
+        SHOVEL1 = new ItemStack(Material.IRON_SPADE);
+        SHOVEL1.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+
+        SHOVEL2 = new ItemStack(Material.GOLD_SPADE);
+        SHOVEL2.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+
+        SHOVEL3 = new ItemStack(Material.DIAMOND_SPADE);
+        SHOVEL3.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
     }
 }
