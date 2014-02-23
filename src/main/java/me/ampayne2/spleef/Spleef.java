@@ -8,6 +8,7 @@ import me.ampayne2.ultimategames.api.arenas.spawnpoints.PlayerSpawnPoint;
 import me.ampayne2.ultimategames.api.games.Game;
 import me.ampayne2.ultimategames.api.games.GamePlugin;
 import me.ampayne2.ultimategames.api.games.items.GameItem;
+import me.ampayne2.ultimategames.api.players.points.PointManager;
 import me.ampayne2.ultimategames.api.utils.UGUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,6 +39,7 @@ public class Spleef extends GamePlugin {
     private static final ItemStack SHOVEL1;
     private static final ItemStack SHOVEL2;
     private static final ItemStack SHOVEL3;
+    private static final ItemStack SNOWBALLS = new ItemStack(Material.SNOW_BALL, 8);
 
     @Override
     public boolean loadGame(UltimateGames ultimateGames, Game game) {
@@ -203,9 +205,6 @@ public class Spleef extends GamePlugin {
 
     @Override
     public void onEntityDamageByEntity(Arena arena, EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player)) {
-            event.setCancelled(true);
-        }
         event.setDamage(0);
     }
 
@@ -259,21 +258,27 @@ public class Spleef extends GamePlugin {
         player.setHealth(20.0);
         player.setFoodLevel(20);
         player.getInventory().clear();
-        if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel3")) {
+        player.getInventory().addItem(UGUtils.createInstructionBook(game));
+        String playerName = player.getName();
+        PointManager pointManager = ultimateGames.getPointManager();
+        if (pointManager.hasPerk(game, playerName, "shovel3")) {
             player.getInventory().addItem(SHOVEL3);
-        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel2")) {
+        } else if (pointManager.hasPerk(game, playerName, "shovel2")) {
             player.getInventory().addItem(SHOVEL2);
-        } else if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "shovel1")) {
+        } else if (pointManager.hasPerk(game, playerName, "shovel1")) {
             player.getInventory().addItem(SHOVEL1);
         } else {
             player.getInventory().addItem(SHOVEL);
         }
 
-        if (ultimateGames.getPointManager().hasPerk(game, player.getName(), "haste")) {
+        if (pointManager.hasPerk(game, playerName, "haste")) {
             player.getInventory().addItem(HASTE.getItem());
         }
 
-        player.getInventory().addItem(UGUtils.createInstructionBook(game));
+        if (pointManager.hasPerk(game, playerName, "snowballs")) {
+            player.getInventory().addItem(SNOWBALLS);
+        }
+
         player.getInventory().setArmorContents(null);
         player.updateInventory();
     }
