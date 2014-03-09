@@ -45,6 +45,7 @@ public class Spleef extends GamePlugin {
     public boolean loadGame(UltimateGames ultimateGames, Game game) {
         this.ultimateGames = ultimateGames;
         this.game = game;
+        game.setMessages(SMessage.class);
         ultimateGames.getGameItemManager().registerGameItem(game, HASTE);
         return true;
     }
@@ -105,7 +106,7 @@ public class Spleef extends GamePlugin {
     public void endArena(Arena arena) {
         List<String> players = arena.getPlayers();
         if (players.size() == 1) {
-            ultimateGames.getMessenger().sendGameMessage(Bukkit.getServer(), game, "GameEnd", players.get(0), game.getName(), arena.getName());
+            ultimateGames.getMessenger().sendGameMessage(Bukkit.getServer(), game, SMessage.GAME_END, players.get(0), game.getName(), arena.getName());
             ultimateGames.getPointManager().addPoint(game, players.get(0), "store", 10);
             ultimateGames.getPointManager().addPoint(game, players.get(0), "win", 1);
         }
@@ -180,7 +181,7 @@ public class Spleef extends GamePlugin {
             if (scoreBoard != null) {
                 scoreBoard.setScore(ChatColor.GREEN + "Survivors", arena.getPlayers().size());
             }
-            ultimateGames.getMessenger().sendGameMessage(arena, game, "Death", player.getName());
+            ultimateGames.getMessenger().sendGameMessage(arena, game, SMessage.DEATH, player.getName());
             ultimateGames.getPointManager().addPoint(game, player.getName(), "loss", 1);
             ultimateGames.getPlayerManager().makePlayerSpectator(player);
         }

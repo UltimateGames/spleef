@@ -22,8 +22,5 @@ CustomValues:
   MaxGameTime: 600
 Instructions:
 - "Dig out the snow blocks underneath other players to make them fall, and avoid falling in yourself!\n\nLast player standing wins!"
-Messages:
-  GameEnd: "%s won %s on arena %s!"
-  Death: "%s died!"
 BlockBreakWhitelist:
 - "SNOW_BLOCK"
