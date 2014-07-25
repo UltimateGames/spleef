@@ -6,13 +6,6 @@ playerType: "CONFIGUREABLE"
 DefaultSettings:
   MinPlayers: 3
   MaxPlayers: 8
-  Players:
-    Store-Inventory: false
-    Store-Armor: false
-    Store-Exp: false
-    Store-Effects: false
-    Store-Gamemode: false
-  Reset-After-Match: true
   Allow-Explosion-Damage: true
   Allow-Explosion-Block-Breaking: true
   Allow-Mob-Spawning: false
